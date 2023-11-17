@@ -34,11 +34,12 @@ LED3 = board.get_pin('d:10:o')
 LED4 = board.get_pin('d:9:o')
 LED5 = board.get_pin('d:8:o')
 LED6 = board.get_pin('d:7:o')
+LED7 = board.get_pin('d:3:o')
 button = board.digital[2]
 in1 = board.get_pin("d:5:o")
 in2 = board.get_pin("d:6:o")
 LEDs = [LED1,LED2,LED3,LED4,LED5,LED6]
-standF = [330.00,247.00,196.00,293.00,220.00,164.00]
+standF = [330.00,242.00,392.00,293.00,220.00,164.00]
 LED_index=-1
 
 buttonstate=0
@@ -118,28 +119,62 @@ def freq_dect(stdfreq):
             print ('freq: {:7.2f} Hz     note: {:>3s} {:+.2f}'.format(freq, note_name(n0), n-n0))
             print(freq-stdfreq)
         
+
         if(freq-stdfreq>2):
-            counterclockwise()
+            if((stdfreq==standF[0])|(stdfreq==standF[1])|(stdfreq==standF[2])):
+                counterclockwise()
+            else:
+                clockwise()
+
+
             time.sleep(0.2)
         elif(freq-stdfreq<-2):
-            clockwise()
+            if((stdfreq==standF[0])|(stdfreq==standF[1])|(stdfreq==standF[2])):
+                clockwise()
+            else:
+                counterclockwise()
+
+            
             time.sleep(0.2)
         elif(freq-stdfreq>=-2 or freq-stdfreq<=2) : 
             stop()
+            time.sleep(0.2)
+            LED7.write(1)
+            time.sleep(2)
+            LED7.write(0)
+            for LED in LEDs:
+                LED.write(0)
+
             break
 
  
 def counterclockwise():
     in1.write(1)
     in2.write(0)
+    for a in reversed(range(-1,5)):
+        
+        LEDs[a+1].write(0)
+        time.sleep(0.039)
+        LEDs[a].write(1)
+        
+        
     
 def clockwise():
     in2.write(1)
     in1.write(0)
+   
+    for a in range(-1,5):
+        LEDs[a].write(0)
+        time.sleep(0.039)
+        LEDs[a+1].write(1)
+        
+
     
 def stop():
     in1.write(0)
     in2.write(0)
+
+
 
 button.mode = pyfirmata.INPUT
    
@@ -147,6 +182,7 @@ for LED in LEDs:
     LED.write(0)
 
 while(True):
+    
    
     buttonstate=button.read()
     time.sleep(0.01)
@@ -174,7 +210,11 @@ while(True):
                     LEDs[i].write(0)
                     time.sleep(1)
                     LEDs[i].write(1)
+                    time.sleep(1)
+                    
+
                     freq_dect(standF[i])
+                    LEDs[i].write(1)
                     time.sleep(1)
                     stop()
                 
@@ -183,7 +223,7 @@ while(True):
                    
     laststate=buttonstate
 
-  
+  #this is a test
     
         
     
